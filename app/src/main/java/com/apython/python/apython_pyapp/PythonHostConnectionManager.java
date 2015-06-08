@@ -1,86 +1,69 @@
 package com.apython.python.apython_pyapp;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
-import android.os.Messenger;
+import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 
 /*
- * This manager handles the entire Communication between the python host and us.
+ * Handles the connection with the Python host.
  *
  * Created by Sebastian on 28.05.2015.
  */
 
 public class PythonHostConnectionManager {
 
-    public static final String TAG = MainActivity.TAG;
+    // The request code used for the Python host
+    public static final int PYTHON_HOST_REQUEST_CODE = 0;
+    // The protocol version used by this app
+    public static final int PROTOCOL_VERSION = 0;
+    // The communication handler that receives all incoming messages from the Python host.
+    PythonHostCommunicationHandler communicationHandler;
 
-    // A Connector for establishing the connection to the python host service.
-    private PythonHostServiceConnection connection;
-
-    private PythonHostCommunicationHandler communicationHandler;
-
-    private static final int PYTHON_HOST_LOOKUP_REQUEST_CODE = 0;
-
-    private Activity mainActivity;
-
-    public PythonHostConnectionManager(Activity mainActivity) {
-        this.communicationHandler = new PythonHostCommunicationHandler();
-        this.connection = new PythonHostServiceConnection( new PythonHostServiceConnection.ConnectionListener() {
+    public PythonHostConnectionManager() {
+        this.communicationHandler = new PythonHostCommunicationHandler(new PythonHostCommunicationHandler.ConnectionManager() {
             @Override
-            public void onConnected(Messenger messenger) {
-                communicationHandler.initializeCommunication(messenger);
+            public void onMessage(Message message) {
+                handleMessage(message);
             }
         });
-        this.mainActivity = mainActivity;
     }
 
-    public void connect() {
-        Intent pythonHostLookup = new Intent("com.apython.python.pythonhost.PYTHON_APP_EXECUTE");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
-            pythonHostLookup.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        }
-
-        try {
-            this.mainActivity.startActivityForResult(pythonHostLookup, PYTHON_HOST_LOOKUP_REQUEST_CODE);
-        } catch (ActivityNotFoundException e) {
-            Log.w(TAG, "Python host is not installed.");
-            // TODO: Handle this.
-        }
+    public IBinder getMessengerBinder() {
+        return this.communicationHandler.getBinder();
     }
 
-    public void closeConnection() {
-        Log.d(TAG, "bound: " + this.connection.isBound());
-        // Unbind from the service
-        if (this.connection.isBound()) {
-            this.mainActivity.unbindService(this.connection);
-            //this.mBound = false;
-        }
+    public void connectToPythonHost(Activity mainActivity) {
+        Intent startIntent = new Intent("com.python.pythonhost.PYTHON_APP_EXECUTE");
+        startIntent.putExtra("protocolVersion", PROTOCOL_VERSION);
+        startIntent.putExtra("appTag", MainActivity.TAG);
+        startIntent.putExtra("packageName", mainActivity.getPackageName());
+        startIntent.putExtra("serviceName", PythonHostCommunicationService.class.getName());
+        mainActivity.startActivityForResult(startIntent, PYTHON_HOST_REQUEST_CODE);
     }
 
-    public void handleActivityResult(int requestCode, int resultCode, Intent result) {
-        if (requestCode == PYTHON_HOST_LOOKUP_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
-                Log.d(TAG, "Got result from python host: package_name = " + result.getStringExtra("package_name") + ", service_name = " + result.getStringExtra("service_name"));
-                // Create intent to connect to the python host
-                Intent intent = new Intent();
-                intent.setClassName(result.getStringExtra("package_name"), result.getStringExtra("service_name"));
-                // Bind to the service
-                Log.d(TAG, intent + "");
-                try {
-                    this.mainActivity.bindService(intent, this.connection, Context.BIND_AUTO_CREATE);
-                } catch (SecurityException se) {
-                    Log.e(TAG, "Could not connect to the python host.");
-                    se.printStackTrace();
-                    // TODO: Handle this
-                    this.mainActivity.finish();
+    public void handleActivityResult(Activity mainActivity, int requestCode, int resultCode, Intent result) {
+        if (requestCode == PYTHON_HOST_REQUEST_CODE) {
+            Log.d(MainActivity.TAG, "Python App finished.");
+            if (resultCode == Activity.RESULT_CANCELED) {
+                Log.w(MainActivity.TAG, "Python App finished with an error!");
+                if (result != null) {
+                    String errorMessage = result.getStringExtra("errorMessage");
+                    if (errorMessage != null) {
+                        Log.w(MainActivity.TAG, errorMessage);
+                    }
                 }
+                // TODO: Handle
+                mainActivity.finish();
+            } else {
+                // App executed normally
+                mainActivity.finish();
             }
-            // TODO: Handle else.
         }
     }
 
+    public void handleMessage(Message message) {
+        // TODO: Implement
+    }
 }
