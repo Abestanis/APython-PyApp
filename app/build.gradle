@@ -1,3 +1,5 @@
+import java.security.KeyException
+
 apply plugin: 'com.android.application'
 
 android {
@@ -16,6 +18,32 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+
+    sourceSets.main{
+        jniLibs.srcDirs = ['src/main/libs']
+        jni.srcDirs = [] //disable automatic ndk-build
+    }
+
+    tasks.whenTaskAdded {
+        task ->
+            if (task.name == 'compileDebugJava') {
+                //noinspection GroovyAssignabilityCheck
+                task.dependsOn ndkBuild
+            }
+    }
+
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    def ndkDir = properties.getProperty('ndk.dir')
+    //noinspection GroovyAssignabilityCheck
+    task ndkBuild(type: Exec, description: 'Compile JNI source via NDK.') {
+        workingDir file('src/main')
+        commandLine 'cmd', '/c', "$ndkDir\\ndk-build", 'NDK_OUT=' + getBuildDir().absolutePath + '\\intermediates\\ndk\\obj'
+    }
+    ndkBuild.onlyIf {
+        if (ndkDir == null) { throw new KeyException('NDK location not found! Define the location with ndk.dir in the local.properties file.')}
+        true
     }
 }
 

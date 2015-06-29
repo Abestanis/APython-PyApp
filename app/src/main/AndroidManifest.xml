@@ -9,15 +9,17 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:theme="@android:style/Theme.NoDisplay">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".PythonHostCommunicationService"
-                 android:exported="true"
-                 android:permission="com.python.permission.PYTHONHOST"/>
+        <activity
+            android:name=".PythonExecuteActivity"
+            android:permission="com.python.permission.PYTHONHOST"
+            android:exported="true" />
     </application>
 
 </manifest>
