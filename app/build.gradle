@@ -27,7 +27,10 @@ android {
 
     tasks.whenTaskAdded {
         task ->
-            if (task.name == 'compileDebugJava') {
+            if (task.name == 'generateDebugAssets') {
+                //noinspection GroovyAssignabilityCheck
+                task.dependsOn zipPythonSources
+            } else if (task.name == 'compileDebugJava') {
                 //noinspection GroovyAssignabilityCheck
                 task.dependsOn ndkBuild
             }
@@ -44,6 +47,14 @@ android {
     ndkBuild.onlyIf {
         if (ndkDir == null) { throw new KeyException('NDK location not found! Define the location with ndk.dir in the local.properties file.')}
         true
+    }
+
+    //noinspection GroovyAssignabilityCheck
+    task zipPythonSources(type: Zip, description: 'Compress the python sources to a zip file and store it in res/raw.') {
+        from 'src/main/python'
+        destinationDir file('src/main/res/raw')
+        version = null
+        baseName = 'code'
     }
 }
 
