@@ -25,9 +25,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         File codeDir = getCodeDir(this.getApplicationContext());
-        String[] children = codeDir.list();
         if (codeDir.exists()) { // TODO: Make a versioning system
-            for (String child : children) {
+            for (String child : codeDir.list()) {
                 new File(codeDir, child).delete();
             }
             codeDir.delete();

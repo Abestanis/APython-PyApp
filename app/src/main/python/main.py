@@ -11,3 +11,8 @@ from util import test
 print(test(1))
 
 import this
+
+import twistedtest
+
+print('Running twistedtest...')
+twistedtest.run()

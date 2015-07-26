@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /*
@@ -22,6 +23,7 @@ public class PythonExecuteActivity extends Activity {
     }
 
     private PythonExecute pyApp;
+    private String libPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,16 +31,21 @@ public class PythonExecuteActivity extends Activity {
         Intent result = getIntent();
         this.setEnv("JAVA_PYTHON_MAIN_CLASSPATH", PythonExecute.class.getCanonicalName().replace('.', '/'));
         ArrayList<String> pythonLibs = result.getStringArrayListExtra("pythonLibs");
+        this.libPath = new File(pythonLibs.get(0)).getParent();
         this.pyApp = new PythonExecute(pythonLibs);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        this.pyApp.startApp(MainActivity.getCodeDir(getApplicationContext()).getAbsolutePath(),
+        this.pyApp.startApp(getIntent().getStringExtra("pythonExecutablePath"),
+                            this.libPath,
                             getIntent().getStringExtra("pythonHome"),
                             getCacheDir().getAbsolutePath(),
-                            MainActivity.TAG);
+                            getIntent().getStringExtra("xdgBasePath"),
+                            MainActivity.getCodeDir(getApplicationContext()).getAbsolutePath(),
+                            MainActivity.TAG,
+                            false);
         finish();
     }
 

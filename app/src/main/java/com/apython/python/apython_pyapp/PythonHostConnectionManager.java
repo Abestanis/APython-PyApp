@@ -20,6 +20,7 @@ public class PythonHostConnectionManager {
         startIntent.putExtra("protocolVersion", PROTOCOL_VERSION);
         startIntent.putExtra("package", this.getClass().getPackage().getName());
         startIntent.putExtra("launchClass", PythonExecuteActivity.class.getCanonicalName());
+        startIntent.putExtra("requirements", "Twisted");
         try {
             mainActivity.startActivity(startIntent);
         } catch (ActivityNotFoundException e) {
