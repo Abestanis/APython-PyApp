@@ -13,14 +13,16 @@ import android.util.Log;
 
 public class PythonHostConnectionManager {
     // The protocol version used by this app
-    public static final int PROTOCOL_VERSION = 0;
+    public static final int    PROTOCOL_VERSION = 0;
+    public static final String MIN_PY_VERSION   = "3.4";
 
     public void connectToPythonHost(Activity mainActivity) {
         Intent startIntent = new Intent("com.python.pythonhost.PYTHON_APP_GET_EXECUTION_INFO");
         startIntent.putExtra("protocolVersion", PROTOCOL_VERSION);
         startIntent.putExtra("package", this.getClass().getPackage().getName());
         startIntent.putExtra("launchClass", PythonExecuteActivity.class.getCanonicalName());
-        startIntent.putExtra("requirements", "Twisted");
+        //startIntent.putExtra("requirements", "Twisted");
+        startIntent.putExtra("pythonVersion", MIN_PY_VERSION);
         try {
             mainActivity.startActivity(startIntent);
         } catch (ActivityNotFoundException e) {

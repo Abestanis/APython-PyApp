@@ -19,5 +19,5 @@ public class PythonExecute {
         }
     }
 
-    public native int startApp(String pythonExecutable, String pythonLibs, String pythonHome, String pythonTemp, String xdgBasePath, String appBaseDir, String appTag, boolean redirectOutput);
+    public native int startApp(String pythonLibName, String pythonExecutable, String pythonLibs, String pythonHome, String pythonTemp, String xdgBasePath, String appBaseDir, String appTag, boolean redirectOutput);
 }

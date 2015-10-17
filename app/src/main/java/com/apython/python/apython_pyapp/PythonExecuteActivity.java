@@ -18,10 +18,6 @@ import java.util.ArrayList;
 
 public class PythonExecuteActivity extends Activity {
 
-    static {
-        System.loadLibrary("envSet");
-    }
-
     private PythonExecute pyApp;
     private String libPath;
 
@@ -29,7 +25,7 @@ public class PythonExecuteActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent result = getIntent();
-        this.setEnv("JAVA_PYTHON_MAIN_CLASSPATH", PythonExecute.class.getCanonicalName().replace('.', '/'));
+        System.setProperty("python.android.entry.class", PythonExecute.class.getCanonicalName().replace('.', '/'));
         ArrayList<String> pythonLibs = result.getStringArrayListExtra("pythonLibs");
         this.libPath = new File(pythonLibs.get(0)).getParent();
         this.pyApp = new PythonExecute(pythonLibs);
@@ -38,7 +34,8 @@ public class PythonExecuteActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        this.pyApp.startApp(getIntent().getStringExtra("pythonExecutablePath"),
+        this.pyApp.startApp(System.mapLibraryName("python" + getIntent().getStringExtra("pythonVersion")),
+                            getIntent().getStringExtra("pythonExecutablePath"),
                             this.libPath,
                             getIntent().getStringExtra("pythonHome"),
                             getCacheDir().getAbsolutePath(),
@@ -48,6 +45,4 @@ public class PythonExecuteActivity extends Activity {
                             false);
         finish();
     }
-
-    private native void setEnv(String key, String value);
 }

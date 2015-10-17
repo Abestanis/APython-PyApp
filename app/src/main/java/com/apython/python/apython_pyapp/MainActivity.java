@@ -25,12 +25,8 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         File codeDir = getCodeDir(this.getApplicationContext());
-        if (codeDir.exists()) { // TODO: Make a versioning system
-            for (String child : codeDir.list()) {
-                new File(codeDir, child).delete();
-            }
-            codeDir.delete();
-        }
+        // TODO: Make a versioning system
+        deleteDirectory(codeDir);
         if (!codeDir.isDirectory()) {
             if (!(codeDir.mkdirs() || codeDir.isDirectory())) {
                 Log.e(MainActivity.TAG, "Failed to create the 'code' directory!");
@@ -51,6 +47,29 @@ public class MainActivity extends Activity {
 
     public static File getCodeDir(Context context) {
         return new File(context.getFilesDir(), "code");
+    }
+
+    public static boolean deleteDirectory(File directory) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    if (!deleteDirectory(file)) {
+                        return false;
+                    }
+                } else {
+                    if (!file.delete()) {
+                        Log.w(MainActivity.TAG, "Failed to delete file '" + file.getAbsolutePath() + "'.");
+                        return false;
+                    }
+                }
+            }
+        }
+        if (directory.exists() && !directory.delete()) {
+            Log.w(MainActivity.TAG, "Failed to delete directory '" + directory.getAbsolutePath() + "'.");
+            return false;
+        }
+        return true;
     }
 
     protected boolean extractPythonCode(File destination) {
