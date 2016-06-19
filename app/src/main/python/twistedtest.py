@@ -24,7 +24,7 @@ class EchoClient(protocol.Protocol):
     """Once connected, send a message, then print the result."""
     
     def connectionMade(self):
-        print('[Client] Starting! My Ip-adress: ' + str(self.transport.getHost()))
+        print('[Client] Starting! My Ip-address: ' + str(self.transport.getHost()))
         print('[Client] Sending message to server...')
         self.transport.write("hello, world!")
     

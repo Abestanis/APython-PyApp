@@ -13,22 +13,22 @@ import android.util.Log;
 
 public class PythonHostConnectionManager {
     // The protocol version used by this app
-    public static final int    PROTOCOL_VERSION = 0;
-    public static final String MIN_PY_VERSION   = "3.4";
+    public static final int PROTOCOL_VERSION = 0;
 
-    public void connectToPythonHost(Activity mainActivity) {
+    public void connectToPythonHost(Activity activity) {
         Intent startIntent = new Intent("com.python.pythonhost.PYTHON_APP_GET_EXECUTION_INFO");
         startIntent.putExtra("protocolVersion", PROTOCOL_VERSION);
         startIntent.putExtra("package", this.getClass().getPackage().getName());
         startIntent.putExtra("launchClass", PythonExecuteActivity.class.getCanonicalName());
-        //startIntent.putExtra("requirements", "Twisted");
-        startIntent.putExtra("pythonVersion", MIN_PY_VERSION);
+        if (PyBuild.PYTHON_MODULE_REQUIREMENTS.length() > 0) {
+            startIntent.putExtra("requirements", PyBuild.PYTHON_MODULE_REQUIREMENTS);
+        }
+        startIntent.putExtra("minPythonVersion", PyBuild.MIN_PY_VERSION);
         try {
-            mainActivity.startActivity(startIntent);
+            activity.startActivity(startIntent);
         } catch (ActivityNotFoundException e) {
             // TODO: Handle this better!
             Log.e(MainActivity.TAG, "Failed to start Python app: No Python interpreter found on system!");
         }
-        mainActivity.finish();
     }
 }

@@ -43,6 +43,7 @@ public class MainActivity extends Activity {
     protected void onStart() {
         super.onStart();
         connectionManager.connectToPythonHost(this);
+        finish();
     }
 
     public static File getCodeDir(Context context) {

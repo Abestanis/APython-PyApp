@@ -12,7 +12,10 @@ print(test(1))
 
 import this
 
-import twistedtest
+#from turtledemo.wikipedia import main
+#main()
+
+#mport twistedtest
 
 print('Running twistedtest...')
 twistedtest.run()
