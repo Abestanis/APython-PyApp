@@ -10,5 +10,5 @@ public class PyBuild {
     
     public static final WindowType APP_WINDOW_TYPE        = WindowType.TERMINAL; /* REPLACE(72,80): windowType */
     public static final String MIN_PY_VERSION             = "3.4"; /* REPLACE(62,65): minPyVersion */
-    public static final String PYTHON_MODULE_REQUIREMENTS = "twisted"; /* REPLACE(62,62): requirements */
+    public static final String PYTHON_MODULE_REQUIREMENTS = "twisted"; /* REPLACE(62,69): requirements */
 }
