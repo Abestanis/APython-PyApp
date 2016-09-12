@@ -12,10 +12,17 @@ print(test(1))
 
 import this
 
-#from turtledemo.wikipedia import main
-#main()
+#from turtledemo import nim
+#nim.main()
+#nim.turtle.mainloop()
 
-#mport twistedtest
+#print('loading turtledemo...')
+#from turtledemo.wikipedia import main
+#print('Finished loading turtledemo. Starting demo...')
+#main()
+#print('Finished demo.')
+
+import twistedtest
 
 print('Running twistedtest...')
 twistedtest.run()

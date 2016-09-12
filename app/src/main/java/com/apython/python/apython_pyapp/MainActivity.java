@@ -1,117 +1,147 @@
 package com.apython.python.apython_pyapp;
 
 import android.app.Activity;
-import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Toast;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 
 public class MainActivity extends Activity {
+    
+    // Our handle to the interpreter host app
+    private InterpreterHost interpreterHost;
 
-    // The tag for this App // TODO: Maybe use the app name instead?
-    public static final String TAG = "PythonApp";
+    // The Python app thread
+    @SuppressWarnings("FieldCanBeLocal")
+    private Thread appThread;
+    
+    // A handle to the Ui provided by the Python host
+    private Object uiHandle;
 
-    // The manager to manage the connection with the Python host.
-    private PythonHostConnectionManager connectionManager;
+    // The request ID of the interpreter host activity
+    public static final int INTERPRETER_REQUEST_ID = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        File codeDir = getCodeDir(this.getApplicationContext());
+        File codeDir = PyAppUtil.getCodeDir(this.getApplicationContext());
         // TODO: Make a versioning system
-        deleteDirectory(codeDir);
+        PyAppUtil.deleteDirectory(codeDir);
         if (!codeDir.isDirectory()) {
             if (!(codeDir.mkdirs() || codeDir.isDirectory())) {
-                Log.e(MainActivity.TAG, "Failed to create the 'code' directory!");
+                Log.e(PyBuild.APP_LOG_TAG, "Failed to create the 'code' directory!");
                 // TODO: Handle this.
                 finish();
                 return;
             }
-            this.extractPythonCode(codeDir);
+            if (!PyAppUtil.extractPythonCode(this, codeDir)) {
+                Log.e(PyBuild.APP_LOG_TAG, "Failed to extract our python code!");
+                // TODO: Handle this.
+                finish();
+                return;
+            }
         }
-        this.connectionManager = new PythonHostConnectionManager();
+        this.interpreterHost = new InterpreterHost(this, PyBuild.APP_LOG_TAG);
     }
 
     @Override
     protected void onStart() {
+        Log.w(PyBuild.APP_LOG_TAG, "<<< ON START >>>");
         super.onStart();
-        connectionManager.connectToPythonHost(this);
-        finish();
+        if (!interpreterHost.connectToHost(INTERPRETER_REQUEST_ID, PyBuild.MIN_PY_VERSION,
+                                           PyBuild.PYTHON_MODULE_REQUIREMENTS, PyHostVerifyActivity.class)) {
+            // TODO: Handle this better!
+            errorExit("Failed to start Python app: No Python interpreter found on system!");
+        }
+    }
+    
+    // TODO: Remove this hack
+    static Intent pyHostResultIntent;
+    
+    static void setPyHostResultIntent(Intent resultIntent) {
+        pyHostResultIntent = resultIntent;
     }
 
-    public static File getCodeDir(Context context) {
-        return new File(context.getFilesDir(), "code");
-    }
-
-    public static boolean deleteDirectory(File directory) {
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    if (!deleteDirectory(file)) {
-                        return false;
-                    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == INTERPRETER_REQUEST_ID) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (pyHostResultIntent != null) {
+                    startApp(pyHostResultIntent);
+                    pyHostResultIntent = null;
                 } else {
-                    if (!file.delete()) {
-                        Log.w(MainActivity.TAG, "Failed to delete file '" + file.getAbsolutePath() + "'.");
-                        return false;
-                    }
+                    Log.e(PyBuild.APP_LOG_TAG, "The Python host did not call the PythonHostVerifyActivity!");
+                    errorExit("The Python Host did not verify itself as trusted by the user!");
                 }
+            } else {
+                String protocolVersion = "unknown";
+                if (data != null && data.hasExtra("protocolVersion")) {
+                    protocolVersion = String.valueOf(data.getIntExtra("protocolVersion", -1));
+                }
+                Log.e(PyBuild.APP_LOG_TAG, "Python Host error (protocol version " + protocolVersion + ")!");
+                errorExit("The Python Host returned an error!");
             }
         }
-        if (directory.exists() && !directory.delete()) {
-            Log.w(MainActivity.TAG, "Failed to delete directory '" + directory.getAbsolutePath() + "'.");
-            return false;
-        }
-        return true;
     }
 
-    protected boolean extractPythonCode(File destination) {
-        Log.d(TAG, "Extracting code to " + destination); // TODO: Maybe also leave it in the zip format.
-        ZipInputStream archive;
-        try {
-            String filename;
-            archive = new ZipInputStream(new BufferedInputStream(getResources().openRawResource(R.raw.code)));
-            ZipEntry zipEntry;
-            byte[] buffer = new byte[1024];
-            int count;
-
-            while ((zipEntry = archive.getNextEntry()) != null) {
-                filename = zipEntry.getName();
-                if (zipEntry.isDirectory()) {
-                    // Create the directory if not exists
-                    File directory = new File(destination, filename);
-                    if (!(directory.mkdirs() || directory.isDirectory())) {
-                        Log.e(TAG, "Could not save directory '" + filename + "' to path '"
-                                + directory.getAbsolutePath() + "' while trying to install the Python modules!");
-                        archive.close();
-                        return false;
-                    }
-                } else {
-                    // Save the file
-                    File file = new File(destination, filename);
-                    FileOutputStream outputFile = new FileOutputStream(file);
-                    while ((count = archive.read(buffer)) != -1) {
-                        outputFile.write(buffer, 0, count);
-                    }
-                    outputFile.close();
+    private void startApp(final Intent data) {
+        if (interpreterHost.loadInterpreterFromHostData(data)) {
+            setContentView(R.layout.python_window);
+            this.uiHandle = interpreterHost.setWindow(PyBuild.APP_WINDOW_TYPE.ordinal(),
+                                                      (ViewGroup) findViewById(R.id.fragmentContainer));
+            appThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    int result = interpreterHost.startInterpreter(
+                        new String[] {new File(PyAppUtil.getCodeDir(getApplicationContext()), "main.py").getAbsolutePath()}
+                    );
+                    Log.w(PyBuild.APP_LOG_TAG, "<<< FINISH (exit code " + result + ") >>>");
+                    setResult(result);
+                    finish();
                 }
-                archive.closeEntry();
+            });
+            appThread.start();
+        } else {
+            errorExit("Failed to load the Python host interpreter!");
+        }
+    }
+
+    private void errorExit(String message) {
+        errorExit(message, null);
+    }
+
+    private void errorExit(final String message, Throwable e) {
+        Log.e(PyBuild.APP_LOG_TAG, "Python App exiting: " + message, e);
+        Intent result = new Intent();
+        result.putExtra("error", e);
+        result.putExtra("errorMsg", message);
+        setResult(RESULT_CANCELED, result);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
+                finish();
             }
-            archive.close();
-            return true;
-        }
-        catch(IOException e) {
-            Log.e(TAG, "Failed to extract the Python modules!");
-            e.printStackTrace();
-            return false;
-        }
+        });
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        return uiHandle instanceof Window.Callback &&
+                ((Window.Callback) uiHandle).dispatchKeyEvent(event) ||
+                super.dispatchKeyEvent(event);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        if (uiHandle instanceof Window.Callback)
+            ((Window.Callback) uiHandle).onWindowFocusChanged(hasFocus);
     }
 }
