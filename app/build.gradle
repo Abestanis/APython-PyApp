@@ -12,7 +12,6 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -29,8 +28,6 @@ android {
         destinationDir file('src/main/res/raw')
         version = null
         baseName = 'code'
-    }
-    productFlavors {
     }
 }
 
