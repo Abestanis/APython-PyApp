@@ -1,3 +1,3 @@
 <resources>
-    <string name="app_name">APython-PyApp</string>
+    <string name="app_name">APython-PyApp</string> <!-- REPLACE(29,42): appName -->
 </resources>

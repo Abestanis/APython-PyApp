@@ -1,4 +1,4 @@
-package com.apython.python.apython_pyapp;
+package com.apython.python.apython_pyapp; /* REPLACE(9,41): appId */
 
 /**
  * This file contains the configuration of this app.  

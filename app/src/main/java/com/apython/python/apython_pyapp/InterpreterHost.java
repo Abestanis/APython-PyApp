@@ -1,4 +1,4 @@
-package com.apython.python.apython_pyapp;
+package com.apython.python.apython_pyapp; /* REPLACE(9,41): appId */
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
