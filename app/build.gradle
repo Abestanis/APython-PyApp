@@ -17,7 +17,6 @@ android {
     }
     tasks.whenTaskAdded {
         task ->
-            if (task.name == 'generateDebugAssets' || task.name == 'generateReleaseResources') {
                 //noinspection GroovyAssignabilityCheck
                 task.dependsOn zipPythonSources
             }
