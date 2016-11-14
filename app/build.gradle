@@ -18,11 +18,9 @@ android {
     tasks.whenTaskAdded {
         task ->
             if (task.name.startsWith('generate') && task.name.endsWith('Resources')) {
-                //noinspection GroovyAssignabilityCheck
                 task.dependsOn zipPythonSources
             }
     }
-    //noinspection GroovyAssignabilityCheck
     task zipPythonSources(type: Zip, description: 'Compress the python sources to a zip file and store it in res/raw.') {
         from 'src/main/python'
         destinationDir file('src/main/res/raw')
