@@ -5,7 +5,7 @@ android {
     buildToolsVersion '23.0.3'
     defaultConfig {
         applicationId "com.apython.python.apython_pyapp" /* REPLACE(24,56): appId */
-        minSdkVersion 8 /* REPLACE(23,24): appMinSdk */
+        minSdkVersion 9 /* REPLACE(23,24): appMinSdk */
         targetSdkVersion 23 /* REPLACE(26,28): appTargetSdk */
         versionCode 1 /* REPLACE(21,22): appNumVersion */
         versionName "1.0" /* REPLACE(22,25): appVersion */
