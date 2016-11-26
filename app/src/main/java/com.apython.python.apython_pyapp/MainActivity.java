@@ -1,6 +1,7 @@
 package com.apython.python.apython_pyapp; /* REPLACE(9,41): appId */
 
 import android.app.Activity;
+import android.content.ComponentCallbacks;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -143,5 +144,29 @@ public class MainActivity extends Activity {
     public void onWindowFocusChanged(boolean hasFocus) {
         if (uiHandle instanceof Window.Callback)
             ((Window.Callback) uiHandle).onWindowFocusChanged(hasFocus);
+    }
+
+    @Override
+    protected void onDestroy() {
+        interpreterHost.notifyActivityLifecycleEvent(InterpreterHost.ON_DESTROY);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        interpreterHost.notifyActivityLifecycleEvent(InterpreterHost.ON_RESUME);
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        interpreterHost.notifyActivityLifecycleEvent(InterpreterHost.ON_PAUSE);
+        super.onPause();
+    }
+
+    @Override
+    public void onLowMemory() {
+        if (uiHandle instanceof ComponentCallbacks) ((ComponentCallbacks) uiHandle).onLowMemory();
+        super.onLowMemory();
     }
 }

@@ -3,9 +3,7 @@ package com.apython.python.apython_pyapp; /* REPLACE(9,41): appId */
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.util.Log;
 import android.view.ViewGroup;
 
@@ -24,7 +22,13 @@ public class InterpreterHost {
     // The apps activity which hosts the UI for the Python app.
     private final Activity hostingAppActivity;
     
+    private boolean isInterpreterLoaded = false;
+    
     private String logTag = "PythonApp";
+    
+    public static final int ON_DESTROY = 0;
+    public static final int ON_PAUSE = 1;
+    public static final int ON_RESUME = 2;
     
     public InterpreterHost(Activity hostingAppActivity, String logTag) {
         this.hostingAppActivity = hostingAppActivity;
@@ -58,11 +62,19 @@ public class InterpreterHost {
             Log.e(logTag, "Failed to load the native library provided py the interpreter host!", e);
             return false;
         }
-        return loadPythonHost(hostingAppActivity, data.getStringExtra("pythonVersion"));
+        isInterpreterLoaded = loadPythonHost(hostingAppActivity, data.getStringExtra("pythonVersion"));
+        return isInterpreterLoaded;
+    }
+    
+    public void notifyActivityLifecycleEvent(int eventId) {
+        if (isInterpreterLoaded) {
+            onActivityLifecycleEvent(eventId);
+        }
     }
     
     private native boolean loadPythonHost(Activity activity, String pythonVersion);
     private native void    setLogTag(String tag);
     public  native Object  setWindow(int windowType, ViewGroup parent);
     public  native int     startInterpreter(String[] args);
+    private native void    onActivityLifecycleEvent(int eventId);
 }
