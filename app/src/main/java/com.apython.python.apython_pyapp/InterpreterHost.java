@@ -59,7 +59,7 @@ public class InterpreterHost {
             System.load(libPath);
             setLogTag(logTag);
         } catch (UnsatisfiedLinkError e) {
-            Log.e(logTag, "Failed to load the native library provided py the interpreter host!", e);
+            Log.e(logTag, "Failed to load the native library provided by the interpreter host!", e);
             return false;
         }
         isInterpreterLoaded = loadPythonHost(hostingAppActivity, data.getStringExtra("pythonVersion"));

@@ -2,10 +2,10 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23 /* REPLACE(23,25): appTargetSdk */
-    buildToolsVersion '23.0.3'
+    buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "com.apython.python.apython_pyapp" /* REPLACE(24,56): appId */
-        minSdkVersion 9 /* REPLACE(23,24): appMinSdk */
+        minSdkVersion 14 /* REPLACE(23,25): appMinSdk */
         targetSdkVersion 23 /* REPLACE(26,28): appTargetSdk */
         versionCode 1 /* REPLACE(21,22): appNumVersion */
         versionName "1.0" /* REPLACE(22,25): appVersion */
@@ -21,7 +21,8 @@ android {
                 task.dependsOn zipPythonSources
             }
     }
-    task zipPythonSources(type: Zip, description: 'Compress the python sources to a zip file and store it in res/raw.') {
+    task zipPythonSources(type: Zip, 
+            description: 'Compress the python sources to a zip file and store it in res/raw.') {
         from 'src/main/python'
         destinationDir file('src/main/res/raw')
         version = null
