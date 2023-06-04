@@ -11,8 +11,6 @@ import android.view.ViewGroup;
  * A wrapper of the defined interface of any Python Host.
  * One should be able to just copy this class into ones
  * Python App project and let it handle all communication.
- * 
- * Created by Sebastian on 20.08.2016.
  */
 @SuppressWarnings("JniMissingFunction") // They are all provided by the Python host
 public class InterpreterHost {

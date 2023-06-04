@@ -12,8 +12,6 @@ import java.util.zip.ZipInputStream;
 
 /**
  * An utility class for the Python app.
- * 
- * Created by Sebastian on 20.08.2016.
  */
 public class PyAppUtil {
     

@@ -4,9 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 /**
- * This is a temporary solution to enforce the python host permission on the python host.
- * 
- * Created by Sebastian on 11.09.2016.
+ * This is a temporary solution to enforce the Python host permission on the Python host.
  */
 public class PyHostVerifyActivity extends Activity {
     @Override
