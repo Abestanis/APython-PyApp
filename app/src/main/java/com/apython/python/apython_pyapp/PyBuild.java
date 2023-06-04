@@ -12,5 +12,5 @@ public class PyBuild {
     public static final String APP_LOG_TAG                = "PythonApp"; /* REPLACE(62,71): appLogTag */
     public static final WindowType APP_WINDOW_TYPE        = WindowType.TERMINAL; /* REPLACE(72,80): windowType */
     public static final String MIN_PY_VERSION             = "3.4"; /* REPLACE(62,65): minPyVersion */
-    public static final String PYTHON_MODULE_REQUIREMENTS = "twisted"; /* REPLACE(62,69): requirements */
+    public static final String PYTHON_MODULE_REQUIREMENTS = ""; /* REPLACE(62,69): requirements */
 }

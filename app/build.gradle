@@ -1,19 +1,30 @@
-apply plugin: 'com.android.application'
+plugins {
+    id 'com.android.application'
+}
 
 android {
-    compileSdkVersion 23 /* REPLACE(23,25): appTargetSdk */
-    buildToolsVersion '26.0.2'
+    namespace 'com.apython.python.apython_pyapp' /* REPLACE(16,48): appId */
+    compileSdk 23 /* REPLACE(16,18): appTargetSdk */
+
     defaultConfig {
         applicationId "com.apython.python.apython_pyapp" /* REPLACE(24,56): appId */
-        minSdkVersion 14 /* REPLACE(23,25): appMinSdk */
-        targetSdkVersion 23 /* REPLACE(26,28): appTargetSdk */
+        minSdk 14 /* REPLACE(16,18): appMinSdk */
+        targetSdk 23 /* REPLACE(19,21): appTargetSdk */
         versionCode 1 /* REPLACE(21,22): appNumVersion */
         versionName "1.0" /* REPLACE(22,25): appVersion */
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
     buildTypes {
         release {
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     tasks.whenTaskAdded {
         task ->
@@ -21,15 +32,20 @@ android {
                 task.dependsOn zipPythonSources
             }
     }
-    task zipPythonSources(type: Zip, 
-            description: 'Compress the python sources to a zip file and store it in res/raw.') {
+
+    tasks.register('zipPythonSources', Zip) {
+        description = 'Compress the python sources to a zip file and store it in res/raw.'
+        archiveFileName = 'code.zip'
+        destinationDirectory = file('src/main/res/raw')
         from 'src/main/python'
-        destinationDir file('src/main/res/raw')
-        version = null
-        baseName = 'code'
+    }
+    gradle.projectsEvaluated {
+        preBuild.dependsOn('zipPythonSources')
     }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 }

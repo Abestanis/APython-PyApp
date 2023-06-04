@@ -77,4 +77,5 @@ public class InterpreterHost {
     public  native Object  setWindow(int windowType, ViewGroup parent);
     public  native int     startInterpreter(String[] args);
     private native void    onActivityLifecycleEvent(int eventId);
+    public  native void    registerJavaCallback(Runnable callback);
 }
